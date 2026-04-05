@@ -8,7 +8,7 @@ class AgentState(TypedDict):
     messages: Annotated[list, add_messages]
 
     # Conversation flow
-    phase: str              # "identity" | "incident" | "classified"
+    phase: str              # "greeting" | "incident" | "identity" | "classified" | "handoff"
     intent: str             # "unknown" | "theft" | "other" | "handoff"
 
     # Client identity

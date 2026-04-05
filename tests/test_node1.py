@@ -109,7 +109,7 @@ class TestLooksLikeTheft:
 def _make_state(**kwargs) -> AgentState:
     defaults: AgentState = {
         "messages": [],
-        "phase": "identity",
+        "phase": "greeting",
         "intent": "unknown",
         "client_id": "",
         "policy_number": "",
@@ -135,32 +135,54 @@ def mock_llm_response():
 
 
 class TestNode1Chatbot:
-    def test_initial_greeting_phase_identity(self, mock_llm_response):
-        state = _make_state(messages=[HumanMessage(content="hallo")])
+    def test_greeting_triggers_bot_response(self, mock_llm_response):
+        state = _make_state(messages=[])
         result = node1_chatbot(state)
         assert "messages" in result
         assert mock_llm_response.invoke.called
 
-    def test_valid_identity_transitions_to_incident(self, mock_llm_response):
-        state = _make_state(messages=[
-            HumanMessage(content="klantnummer 112233 polis POL-2024-00101")
-        ])
+    def test_first_user_message_moves_to_incident(self, mock_llm_response):
+        state = _make_state(phase="greeting", messages=[HumanMessage(content="hallo")])
         result = node1_chatbot(state)
         assert result.get("phase") == "incident"
+
+    def test_theft_detected_moves_to_identity(self, mock_llm_response):
+        state = _make_state(
+            phase="incident",
+            messages=[HumanMessage(content="mijn fiets is gestolen gisteren avond")]
+        )
+        result = node1_chatbot(state)
+        assert result.get("theft_confirmed") is True
+        assert result.get("phase") == "identity"
+
+    def test_valid_identity_sets_classified_theft(self, mock_llm_response):
+        state = _make_state(
+            phase="identity",
+            theft_confirmed=True,
+            messages=[HumanMessage(content="klantnummer 112233 polis POL-2024-00101")]
+        )
+        result = node1_chatbot(state)
+        assert result.get("phase") == "classified"
+        assert result.get("intent") == "theft"
         assert result.get("client_validated") is True
         assert result.get("client_name") == "Jan De Smedt"
 
     def test_invalid_identity_increments_attempts(self, mock_llm_response):
-        state = _make_state(messages=[
-            HumanMessage(content="klantnummer 000000 polis POL-0000-00000")
-        ])
+        state = _make_state(
+            phase="identity",
+            theft_confirmed=True,
+            intent="theft",
+            messages=[HumanMessage(content="klantnummer 000000 polis POL-0000-00000")]
+        )
         result = node1_chatbot(state)
         assert result.get("validation_attempts") == 1
-        # phase is not explicitly returned when unchanged — stays "identity"
         assert result.get("phase", "identity") == "identity"
 
     def test_three_failed_attempts_triggers_handoff(self, mock_llm_response):
         state = _make_state(
+            phase="identity",
+            theft_confirmed=True,
+            intent="theft",
             validation_attempts=2,
             messages=[HumanMessage(content="klantnummer 000000 polis POL-0000-00000")]
         )
@@ -168,34 +190,10 @@ class TestNode1Chatbot:
         assert result.get("intent") == "handoff"
         assert result.get("phase") == "handoff"
 
-    def test_theft_detected_in_incident_phase(self, mock_llm_response):
-        state = _make_state(
-            phase="incident",
-            client_validated=True,
-            client_name="Jan De Smedt",
-            messages=[HumanMessage(content="mijn fiets is gestolen gisteren avond")]
-        )
-        result = node1_chatbot(state)
-        assert result.get("theft_confirmed") is True
-        assert result.get("phase") == "theft_date"
-
-    def test_theft_date_sets_classified(self, mock_llm_response):
-        state = _make_state(
-            phase="theft_date",
-            client_validated=True,
-            theft_confirmed=True,
-            messages=[HumanMessage(content="gisteren rond 22u")]
-        )
-        result = node1_chatbot(state)
-        assert result.get("intent") == "theft"
-        assert result.get("phase") == "classified"
-        assert result.get("theft_date") == "gisteren rond 22u"
-
     def test_max_classification_attempts_routes_to_other(self, mock_llm_response):
         state = _make_state(
             phase="incident",
             classification_attempts=2,
-            client_validated=True,
             messages=[HumanMessage(content="ik heb een vraag over mijn contract")]
         )
         result = node1_chatbot(state)
@@ -222,5 +220,5 @@ class TestRouter:
 
     def test_still_in_conversation_returns_end(self):
         from langgraph.graph import END
-        state = _make_state(phase="identity", intent="unknown")
+        state = _make_state(phase="greeting", intent="unknown")
         assert route_after_node1(state) == END
