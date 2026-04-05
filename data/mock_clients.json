@@ -1,0 +1,72 @@
+[
+  {
+    "client_id": "112233",
+    "client_name": "Jan De Smedt",
+    "policy_number": "POL-2024-00101",
+    "bike_brand": "Trek",
+    "bike_type": "elektrische fiets"
+  },
+  {
+    "client_id": "224455",
+    "client_name": "Marie Janssen",
+    "policy_number": "POL-2023-00247",
+    "bike_brand": "Gazelle",
+    "bike_type": "stadsfiets"
+  },
+  {
+    "client_id": "336677",
+    "client_name": "Pieter Claes",
+    "policy_number": "POL-2024-00389",
+    "bike_brand": "Specialized",
+    "bike_type": "elektrische fiets"
+  },
+  {
+    "client_id": "448899",
+    "client_name": "Sara Vermeersch",
+    "policy_number": "POL-2022-00512",
+    "bike_brand": "Batavus",
+    "bike_type": "racefiets"
+  },
+  {
+    "client_id": "551122",
+    "client_name": "Thomas Bogaert",
+    "policy_number": "POL-2024-00634",
+    "bike_brand": "Ridley",
+    "bike_type": "racefiets"
+  },
+  {
+    "client_id": "663344",
+    "client_name": "Elien Vandenberghe",
+    "policy_number": "POL-2023-00756",
+    "bike_brand": "Cube",
+    "bike_type": "mountainbike"
+  },
+  {
+    "client_id": "775566",
+    "client_name": "Kevin Martens",
+    "policy_number": "POL-2024-00878",
+    "bike_brand": "Cannondale",
+    "bike_type": "elektrische fiets"
+  },
+  {
+    "client_id": "887788",
+    "client_name": "Nathalie Leclercq",
+    "policy_number": "POL-2022-00990",
+    "bike_brand": "Kalkhoff",
+    "bike_type": "elektrische fiets"
+  },
+  {
+    "client_id": "990011",
+    "client_name": "Bram Wouters",
+    "policy_number": "POL-2023-01012",
+    "bike_brand": "Giant",
+    "bike_type": "hybride fiets"
+  },
+  {
+    "client_id": "101010",
+    "client_name": "Annelies Peeters",
+    "policy_number": "POL-2024-01134",
+    "bike_brand": "Scott",
+    "bike_type": "elektrische fiets"
+  }
+]
